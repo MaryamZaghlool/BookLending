@@ -102,8 +102,6 @@ export class ManageBooksComponent {
     this.showModal = true;
   }
 
-
-
   handleSave(book: Book) {
     if (this.modalMode === 'add') {
       this.bookService.addBook(book).subscribe({
@@ -132,54 +130,17 @@ export class ManageBooksComponent {
     }
   }
 
-
-
-  // viewBook(bookId: number) {
-  //   this.bookService.getBookById(bookId).subscribe({
-  //     next: (book) => {
-  //       console.log('Book details:', book);
-  //     },
-  //     error: (error) => {
-  //       console.error('Error fetching book details:', error);
-  //     }
-  //   });
-  // }
-
-  // editBook(bookId: number, book: Book) {
-  //   this.bookService.updateBook(bookId, book).subscribe({
-  //     next: (book) => {
-  //       this.showToast('Book updated successfully', 'success');
-  //       console.log('Book details:', book);
-  //     },
-  //     error: (error) => {
-  //       console.error('Error fetching book details:', error);
-  //     }
-  //   });
-  // }
-
   deleteBook(bookId: number) {
     this.bookService.deleteBook(bookId).subscribe({
       next: () => {
         this.fetchBooks();
         this.showToast('Book deleted successfully', 'success');
-        console.log("book deleted successfully");
+        // console.log("book deleted successfully");
       },
       error: (error) => {
         this.showToast('Error deleting book', 'error');
-        console.error('Error fetching book details:', error);
+        // console.error('Error fetching book details:', error);
       }
     });
   }
-
-  // addBook(book: Book) {
-  //   this.bookService.addBook(book).subscribe({
-  //     next: (book) => {
-  //       this.fetchBooks();
-  //       this.showToast('Book added successfully', 'success');
-  //     },
-  //     error: (error) => {
-  //       console.error('Error adding book:', error);
-  //     }
-  //   });
-  // }
 }

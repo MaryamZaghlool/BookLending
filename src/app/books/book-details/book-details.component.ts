@@ -114,7 +114,7 @@ export class BookDetailsComponent {
     if (this.bookData?.id) {
       this.borrowService.borrowBook(this.bookData.id).subscribe({
         next: (response: any) => {
-          console.log(response)
+          // console.log(response)
           this.showToast('Book borrowed successfully', 'success');
           this.borrowId = response.id;
           this.dueDate = response.dueDate;

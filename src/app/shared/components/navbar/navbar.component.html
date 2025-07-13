@@ -38,12 +38,25 @@
     </div>
 
     <!-- Mobile Menu -->
-    <div *ngIf="isMenuOpen" class="lg:hidden mt-3 space-y-3">
-        @if(isBorrowed){
-        <a routerLink="/profile" routerLinkActive="text-green-400" (click)="closeMenu()"><span
-                class="material-icons">person</span></a>
-        }
-        <a routerLink="/" class="block" (click)="closeMenu()">Books</a>
-        <a routerLink="/login" class="block" (click)="closeMenu()">Login</a>
+    <div *ngIf="isMenuOpen" class="lg:hidden mt-4 space-y-3 font-medium">
+        <ng-container *ngIf="isBorrowed">
+            <a routerLink="/profile" (click)="closeMenu()" class="block hover:underline">
+                <span class="material-icons">person</span>
+            </a>
+        </ng-container>
+
+        <ng-container *ngIf="isAdmin">
+            <a routerLink="/admin/delayed-books" (click)="closeMenu()" class="block hover:underline">
+                Delayed Books
+            </a>
+        </ng-container>
+
+        <a [routerLink]="isAdmin ? '/admin/dashboard' : '/'" (click)="closeMenu()" class="block hover:underline">
+            {{ isAdmin ? 'Dashboard' : 'Home' }}
+        </a>
+
+        <a routerLink="/login" (click)="isLoggedIn ? logout() : closeMenu()" class="block hover:underline">
+            {{ isLoggedIn ? 'Logout' : 'Login' }}
+        </a>
     </div>
 </nav>

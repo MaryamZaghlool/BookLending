@@ -10,11 +10,11 @@ export class RoleGuard implements CanActivate {
   canActivate(route: ActivatedRouteSnapshot): boolean {
     const expectedRole = route.data['role'][0]; // جاي من route config
     const userRole = localStorage.getItem('role');
-    console.log('Expected:', expectedRole);
-    console.log('User Role:', userRole);
+    // console.log('Expected:', expectedRole);
+    // console.log('User Role:', userRole);
 
     if (userRole === expectedRole) {
-      console.log('Access granted');
+      // console.log('Access granted');
       return true;
     } else {
       // توجيه حسب الدور
