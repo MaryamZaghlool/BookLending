@@ -1,79 +1,86 @@
-import { Component } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { BookService } from '../../core/services/book.service';
 import { Book } from '../../core/models/book.model';
-import { BookModalComponent } from "../../shared/components/book-modal/book-modal.component";
+import { BookModalComponent } from '../../shared/components/book-modal/book-modal.component';
 import { CommonModule } from '@angular/common';
-import { ToasterComponent } from "../../shared/components/toaster/toaster.component";
-import { PaginationComponent } from "../../shared/components/pagination/pagination.component";
-import { ProgressSpinnerOverviewExample } from "../../shared/components/spinner/spinner.component";
+import { ToasterComponent } from '../../shared/components/toaster/toaster.component';
+import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
+import { ProgressSpinnerOverviewExample } from '../../shared/components/spinner/spinner.component';
+import { ConfirmAlertComponent } from '../../shared/components/shared/components/confirm-alert/confirm-alert.component';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-manage-books',
-  imports: [BookModalComponent, CommonModule, ToasterComponent, PaginationComponent, ProgressSpinnerOverviewExample],
+  standalone: true,
+  imports: [
+    BookModalComponent,
+    CommonModule,
+    ToasterComponent,
+    PaginationComponent,
+    ProgressSpinnerOverviewExample,
+    ConfirmAlertComponent,
+  ],
   templateUrl: './manage-books.component.html',
-  styleUrl: './manage-books.component.css'
+  styleUrl: './manage-books.component.css',
 })
-export class ManageBooksComponent {
-
+export class ManageBooksComponent implements OnInit, OnDestroy {
   isLoading = false;
   toastMessage: string | null = null;
   toastType: 'success' | 'error' = 'success';
-  allBooks?: Book[];
+  allBooks: Book[] = [];
   showModal = false;
   modalMode: 'add' | 'edit' | 'view' = 'add';
   selectedBook?: Book;
   currentPage = 1;
   pageSize = 10;
   isLastPage = false;
+  showConfirm = false;
+  bookToDeleteId?: number;
 
-  onPageChange(newPage: number) {
-    this.currentPage = newPage;
-    this.fetchBooks();
-  }
+  private destroy$ = new Subject<void>();
 
-  showToast(message: string, type: 'success' | 'error' = 'success') {
-    this.toastMessage = message;
-    this.toastType = type;
-    setTimeout(() => {
-      this.toastMessage = null;
-    }, 3000);
-  }
-
-  constructor(private bookService: BookService) { }
-
-  fetchBooks(): void {
-    this.isLoading = true;
-    this.bookService.getAllBooks(this.currentPage, this.pageSize).subscribe({
-      next: (books) => {
-        this.allBooks = books;
-        this.isLastPage = books.length < this.pageSize; // If the number of books is less than pageSize, it's the last page
-        this.isLoading = false;
-      },
-      error: (error) => {
-        this.isLoading = false;
-        this.showToast('Error fetching books', 'error');
-      }
-    });
-  }
-
-
-  nextPage() {
-    this.isLoading = true;
-    this.currentPage++;
-    this.fetchBooks();
-  }
-
-  previousPage() {
-    if (this.currentPage > 1) {
-      this.isLoading = true;
-      this.currentPage--;
-      this.fetchBooks();
-    }
-  }
-
+  constructor(
+    private bookService: BookService,
+    private cd: ChangeDetectorRef
+  ) { }
 
   ngOnInit(): void {
     this.fetchBooks();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  fetchBooks(): void {
+    this.isLoading = true;
+    this.cd.markForCheck();
+
+    this.bookService
+      .getAllBooks(this.currentPage, this.pageSize)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (books) => {
+          if (JSON.stringify(this.allBooks) !== JSON.stringify(books)) {
+            this.allBooks = books;
+            this.isLastPage = books.length < this.pageSize;
+          }
+          this.isLoading = false;
+          this.cd.markForCheck();
+        },
+        error: () => {
+          this.isLoading = false;
+          this.showToast('Error fetching books', 'error');
+          this.cd.markForCheck();
+        },
+      });
   }
 
   openAddModal() {
@@ -85,62 +92,109 @@ export class ManageBooksComponent {
       publishedYear: new Date().getFullYear(),
       description: '',
       coverImageUrl: '',
-      isAvailable: true
+      isAvailable: true,
     };
     this.showModal = true;
   }
 
   openEditModal(book: Book) {
-    this.modalMode = 'edit';
-    this.selectedBook = { ...book };
-    this.showModal = true;
-  }
-
-  openViewModal(book: Book) {
-    this.modalMode = 'view';
-    this.selectedBook = { ...book };
-    this.showModal = true;
-  }
-
-  handleSave(book: Book) {
-    if (this.modalMode === 'add') {
-      this.bookService.addBook(book).subscribe({
-        next: () => {
-          this.showToast('Book added successfully', 'success');
-          this.fetchBooks();
-          this.showModal = false;
-        },
-        error: (error) => {
-          console.error('Error adding book:', error);
-          this.showToast('Error adding book', 'error');
-        }
-      });
-    } else if (this.modalMode === 'edit' && book.id) {
-      this.bookService.updateBook(book.id, book).subscribe({
-        next: () => {
-          this.showToast('Book updated successfully', 'success');
-          this.fetchBooks(); // ✅ rerender table
-          this.showModal = false;
-        },
-        error: (error) => {
-          console.error('Error updating book:', error);
-          this.showToast('Error updating book', 'error');
-        }
-      });
+    if (this.selectedBook?.id !== book.id) {
+      this.modalMode = 'edit';
+      this.selectedBook = { ...book };
+      this.showModal = true;
     }
   }
 
-  deleteBook(bookId: number) {
-    this.bookService.deleteBook(bookId).subscribe({
+  openViewModal(book: Book) {
+    if (this.selectedBook?.id !== book.id) {
+      this.modalMode = 'view';
+      this.selectedBook = { ...book };
+      this.showModal = true;
+    }
+  }
+
+  handleSave(book: Book) {
+    const action$ =
+      this.modalMode === 'add'
+        ? this.bookService.addBook(book)
+        : book.id
+          ? this.bookService.updateBook(book.id, book)
+          : null;
+
+    if (!action$) return;
+
+    action$.pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
+        this.showToast(
+          this.modalMode === 'add'
+            ? 'Book added successfully'
+            : 'Book updated successfully',
+          'success'
+        );
         this.fetchBooks();
-        this.showToast('Book deleted successfully', 'success');
-        // console.log("book deleted successfully");
+        this.showModal = false;
       },
       error: (error) => {
-        this.showToast('Error deleting book', 'error');
-        // console.error('Error fetching book details:', error);
-      }
+        console.error(
+          this.modalMode === 'add' ? 'Error adding book:' : 'Error updating book:',
+          error
+        );
+        this.showToast(
+          this.modalMode === 'add'
+            ? 'Error adding book'
+            : 'Error updating book',
+          'error'
+        );
+        this.cd.markForCheck();
+      },
     });
+  }
+
+  confirmDelete(bookId: number) {
+    this.bookToDeleteId = bookId;
+    this.showConfirm = true;
+  }
+
+  handleConfirmDelete() {
+    if (!this.bookToDeleteId) return;
+
+    this.bookService
+      .deleteBook(this.bookToDeleteId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.fetchBooks();
+          this.showToast('Book deleted successfully', 'success');
+          this.showConfirm = false;
+        },
+        error: () => {
+          this.showToast('Error deleting book', 'error');
+          this.showConfirm = false;
+          this.cd.markForCheck();
+        },
+      });
+  }
+
+  onPageChange(newPage: number) {
+    if (newPage !== this.currentPage) {
+      this.currentPage = newPage;
+      this.fetchBooks();
+    }
+  }
+
+  showToast(message: string, type: 'success' | 'error' = 'success') {
+    if (this.toastMessage !== message) {
+      this.toastMessage = message;
+      this.toastType = type;
+      this.cd.markForCheck();
+      setTimeout(() => {
+        this.toastMessage = null;
+        this.cd.markForCheck();
+      }, 3000);
+    }
+  }
+
+  trackByBookId(index: number, book: Book): number {
+    return book.id!;
   }
 }

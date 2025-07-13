@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { BookService } from '../../core/services/book.service';
 import { Book } from '../../core/models/book.model';
 import { CommonModule } from '@angular/common';
@@ -23,7 +23,7 @@ export class BookDetailsComponent {
   isOverdue: boolean = false;
 
 
-  constructor(private route: ActivatedRoute, private bookService: BookService, private borrowService: BorrowService) { }
+  constructor(private route: ActivatedRoute, private bookService: BookService, private borrowService: BorrowService,private router: Router) { }
 
   toastMessage: string | null = null;
   toastType: 'success' | 'error' = 'success';
@@ -129,6 +129,9 @@ export class BookDetailsComponent {
         },
         error: (err) => {
           this.showToast('Error borrowing book, Login first', 'error');
+          setTimeout(() => {
+            this.router.navigate(['/login']);
+          }, 2000);
           console.error('Error borrowing book', err);
         }
       });
