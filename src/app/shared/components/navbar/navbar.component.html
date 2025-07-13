@@ -1,0 +1,49 @@
+<nav class="bg-cyan-700 text-white px-8 py-3 shadow-md">
+    <div class="flex justify-between items-center">
+        <!-- Logo -->
+        <a routerLink="/" class="text-xl font-bold">📚 BookLending</a>
+
+        <!-- Burger Button (Mobile) -->
+        <button class="lg:hidden" (click)="toggleMenu()">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
+
+        <!-- Links (Large Screens) -->
+        <ul class="hidden lg:flex gap-6 font-medium">
+            @if(isBorrowed){
+            <li><a routerLink="/profile" routerLinkActive="text-green-400"><span
+                        class="material-icons">person</span></a>
+            </li>
+            }
+            <ng-container *ngIf="isAdmin">
+                <li>
+                    <a [routerLink]="'/admin/delayed-books'" routerLinkActive="text-green-400"
+                        [routerLinkActiveOptions]="{ exact: true }">
+                        Delayed Books
+                    </a>
+                </li>
+            </ng-container>
+            <li>
+                <a [routerLink]="isAdmin ? '/admin/dashboard' : '/'" routerLinkActive="text-green-400"
+                    [routerLinkActiveOptions]="{ exact: true }">
+                    {{ isAdmin ? 'Dashboard' : 'Home' }}
+                </a>
+            </li>
+
+            <li><a routerLink="/login" routerLinkActive="text-green-400" (click)="isLoggedIn ? logout() : null">{{
+                    isLoggedIn ? 'Logout' : 'Login' }}</a></li>
+        </ul>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div *ngIf="isMenuOpen" class="lg:hidden mt-3 space-y-3">
+        @if(isBorrowed){
+        <a routerLink="/profile" routerLinkActive="text-green-400" (click)="closeMenu()"><span
+                class="material-icons">person</span></a>
+        }
+        <a routerLink="/" class="block" (click)="closeMenu()">Books</a>
+        <a routerLink="/login" class="block" (click)="closeMenu()">Login</a>
+    </div>
+</nav>

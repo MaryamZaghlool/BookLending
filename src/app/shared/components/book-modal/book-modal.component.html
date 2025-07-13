@@ -1,0 +1,84 @@
+<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-md w-full max-w-xl shadow-lg">
+        <h2 class="text-xl font-bold mb-4 capitalize">{{ mode }} Book</h2>
+
+        <form *ngIf="mode !== 'view'" #bookForm="ngForm" (ngSubmit)="onSave()" class="grid gap-4">
+
+            <!-- Title -->
+            <div>
+                <input [(ngModel)]="book.title" name="title" placeholder="Title" class="border p-2 rounded w-full"
+                    required #title="ngModel" />
+                <p *ngIf="title.invalid && title.touched" class="text-red-500 text-sm">Title is required.</p>
+            </div>
+
+            <!-- Author -->
+            <div>
+                <input [(ngModel)]="book.author" name="author" placeholder="Author" class="border p-2 rounded w-full"
+                    required #author="ngModel" />
+                <p *ngIf="author.invalid && author.touched" class="text-red-500 text-sm">Author is required.</p>
+            </div>
+
+            <!-- ISBN -->
+            <div>
+                <input [(ngModel)]="book.isbn" name="isbn" placeholder="ISBN" class="border p-2 rounded w-full" required
+                    #isbn="ngModel" />
+                <p *ngIf="isbn.invalid && isbn.touched" class="text-red-500 text-sm">ISBN is required.</p>
+            </div>
+
+            <!-- Published Year -->
+            <div>
+                <input [(ngModel)]="book.publishedYear" name="publishedYear" type="number" min="0"
+                    class="border p-2 rounded w-full" required #year="ngModel" />
+                <p *ngIf="year.invalid && year.touched" class="text-red-500 text-sm">Valid published year is required.
+                </p>
+            </div>
+
+            <!-- Image URL -->
+            <div>
+                <input [(ngModel)]="book.coverImageUrl" name="coverImageUrl" placeholder="Image URL"
+                    class="border p-2 rounded w-full" required #imageUrl="ngModel" />
+                <p *ngIf="imageUrl.invalid && imageUrl.touched" class="text-red-500 text-sm">Cover image URL is
+                    required.</p>
+            </div>
+
+            <!-- Description -->
+            <div>
+                <textarea [(ngModel)]="book.description" name="description" placeholder="Description"
+                    class="border p-2 rounded w-full" required #description="ngModel"></textarea>
+                <p *ngIf="description.invalid && description.touched" class="text-red-500 text-sm">Description is
+                    required.</p>
+            </div>
+
+            <!-- isAvailable -->
+            <label class="flex items-center gap-2">
+                <input type="checkbox" [(ngModel)]="book.isAvailable" name="isAvailable" />
+                Available
+            </label>
+
+            <!-- Buttons -->
+            <div class="flex justify-end gap-2">
+                <button type="button" (click)="onClose()"
+                    class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Cancel</button>
+                <button type="submit" [disabled]="bookForm.invalid"
+                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50">
+                    {{ mode === 'edit' ? 'Update' : 'Add' }}
+                </button>
+            </div>
+
+        </form>
+
+
+        <div *ngIf="mode === 'view'" class="space-y-2">
+            <img src="{{book.coverImageUrl}}" alt="book cover of {{book.title}}" class="w-full h-64 object-cover mb-4 rounded">
+            <p><strong>Title:</strong> {{ book.title }}</p>
+            <p><strong>Author:</strong> {{ book.author }}</p>
+            <p><strong>ISBN:</strong> {{ book.isbn }}</p>
+            <p><strong>Year:</strong> {{ book.publishedYear }}</p>
+            <p><strong>Description:</strong> {{ book.description }}</p>
+            <p><strong>Available:</strong> {{ book.isAvailable ? 'Yes' : 'No' }}</p>
+            <div class="flex justify-end">
+                <button (click)="onClose()" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,18 @@
+.availability-badge {
+  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8em;
+  font-weight: 600;
+  display: inline-block;
+  margin-bottom: 15px;
+}
+.not-availability-badge{
+  background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+}
+
+.rating-stars {
+  color: #ffd700;
+  font-size: 1.4em;
+}

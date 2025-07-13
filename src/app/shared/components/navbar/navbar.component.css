@@ -1,0 +1,6 @@
+a {
+  transition: 0.2s;
+}
+a:hover {
+  text-decoration: underline;
+}

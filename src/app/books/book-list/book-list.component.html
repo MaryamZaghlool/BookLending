@@ -1,0 +1,21 @@
+<div class="flex items-center justify-center">
+    <app-spinner *ngIf="isLoading"></app-spinner>
+</div>
+
+<section class="flex justify-center gap-7 flex-wrap my-7">
+    @for (book of pagedBooks; track $index) {
+    <div class="w-[300px] border p-3 rounded-md cursor-pointer hover:shadow-xl transition-shadow
+            transform duration-700 ease-in-out animate-fade-in-up"
+        (click)="book.id && goToDetails(book.id)">
+        <img src="{{book.coverImageUrl}}" alt="image of {{ book.title }}" class="w-[100%] h-[250px]" />
+        <div class="py-4">
+            <h2><strong class="text-gray-500">Title: </strong>{{ book.title }}</h2>
+            <p><strong class="text-gray-500">Author: </strong>{{ book.author }}</p>
+            <p><strong class="text-gray-500">Description: </strong>{{ book.description }}</p>
+            <p><strong class="text-gray-500">ISBN: </strong>{{ book.isbn }}</p>
+        </div>
+    </div>
+    }
+</section>
+<app-pagination [currentPage]="currentPage" [isLastPage]="isLastPage" (change)="onPageChange($event)">
+</app-pagination>
