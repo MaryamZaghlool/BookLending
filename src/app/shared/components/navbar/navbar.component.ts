@@ -45,6 +45,7 @@ export class NavbarComponent {
   logout() {
     this.AuthService.logout()
     this.isLoggedIn=false;
+    this.closeMenu();
   }
 
   toggleMenu() {
